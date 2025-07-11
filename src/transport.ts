@@ -23,6 +23,7 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
+import type { AddressInfo } from 'node:net';
 import type { Server } from './server.js';
 
 export async function startStdioTransport(server: Server) {
@@ -96,43 +97,53 @@ async function handleStreamable(server: Server, req: http.IncomingMessage, res: 
   res.end('Invalid request');
 }
 
-export function startHttpTransport(server: Server) {
+export async function startHttpServer(config: { host?: string, port?: number }): Promise<http.Server> {
+  const { host, port } = config;
+  const httpServer = http.createServer();
+  await new Promise<void>((resolve, reject) => {
+    httpServer.on('error', reject);
+    httpServer.listen(port, host, () => {
+      resolve();
+      httpServer.removeListener('error', reject);
+    });
+  });
+  return httpServer;
+}
+
+export function startHttpTransport(httpServer: http.Server, mcpServer: Server) {
   const sseSessions = new Map<string, SSEServerTransport>();
   const streamableSessions = new Map<string, StreamableHTTPServerTransport>();
-  const httpServer = http.createServer(async (req, res) => {
+  httpServer.on('request', async (req, res) => {
     const url = new URL(`http://localhost${req.url}`);
     if (url.pathname.startsWith('/mcp'))
-      await handleStreamable(server, req, res, streamableSessions);
+      await handleStreamable(mcpServer, req, res, streamableSessions);
     else
-      await handleSSE(server, req, res, url, sseSessions);
+      await handleSSE(mcpServer, req, res, url, sseSessions);
   });
-  const { host, port } = server.config.server;
-  httpServer.listen(port, host, () => {
-    const address = httpServer.address();
-    assert(address, 'Could not bind server socket');
-    let url: string;
-    if (typeof address === 'string') {
-      url = address;
-    } else {
-      const resolvedPort = address.port;
-      let resolvedHost = address.family === 'IPv4' ? address.address : `[${address.address}]`;
-      if (resolvedHost === '0.0.0.0' || resolvedHost === '[::]')
-        resolvedHost = 'localhost';
-      url = `http://${resolvedHost}:${resolvedPort}`;
-    }
-    const message = [
-      `Listening on ${url}`,
-      'Put this in your client config:',
-      JSON.stringify({
-        'mcpServers': {
-          'playwright': {
-            'url': `${url}/sse`
-          }
+  const url = httpAddressToString(httpServer.address());
+  const message = [
+    `Listening on ${url}`,
+    'Put this in your client config:',
+    JSON.stringify({
+      'mcpServers': {
+        'playwright': {
+          'url': `${url}/sse`
         }
-      }, undefined, 2),
-      'If your client supports streamable HTTP, you can use the /mcp endpoint instead.',
-    ].join('\n');
+      }
+    }, undefined, 2),
+    'If your client supports streamable HTTP, you can use the /mcp endpoint instead.',
+  ].join('\n');
     // eslint-disable-next-line no-console
-    console.error(message);
-  });
+  console.error(message);
+}
+
+export function httpAddressToString(address: string | AddressInfo | null): string {
+  assert(address, 'Could not bind server socket');
+  if (typeof address === 'string')
+    return address;
+  const resolvedPort = address.port;
+  let resolvedHost = address.family === 'IPv4' ? address.address : `[${address.address}]`;
+  if (resolvedHost === '0.0.0.0' || resolvedHost === '[::]')
+    resolvedHost = 'localhost';
+  return `http://${resolvedHost}:${resolvedPort}`;
 }

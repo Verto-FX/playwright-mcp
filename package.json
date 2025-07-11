@@ -17,15 +17,18 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
+    "build:extension": "tsc --project extension",
     "lint": "npm run update-readme && eslint . && tsc --noEmit",
     "update-readme": "node utils/update-readme.js",
     "watch": "tsc --watch",
+    "watch:extension": "tsc --watch --project extension",
     "test": "playwright test",
     "ctest": "playwright test --project=chrome",
     "ftest": "playwright test --project=firefox",
     "wtest": "playwright test --project=webkit",
+    "etest": "playwright test --project=chromium-extension",
     "run-server": "node lib/browserServer.js",
-    "clean": "rm -rf lib",
+    "clean": "rm -rf lib && rm -rf extension/lib",
     "npm-publish": "npm run clean && npm run build && npm run test && npm publish"
   },
   "exports": {
@@ -41,6 +44,7 @@
     "debug": "^4.4.1",
     "mime": "^4.0.7",
     "playwright": "1.53.0",
+    "ws": "^8.18.1",
     "zod-to-json-schema": "^3.24.4"
   },
   "devDependencies": {
@@ -48,8 +52,10 @@
     "@eslint/js": "^9.19.0",
     "@playwright/test": "1.53.0",
     "@stylistic/eslint-plugin": "^3.0.1",
+    "@types/chrome": "^0.0.315",
     "@types/debug": "^4.1.12",
     "@types/node": "^22.13.10",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
     "@typescript-eslint/utils": "^8.26.1",
