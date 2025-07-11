@@ -10,7 +10,7 @@ A Model Context Protocol (MCP) server that provides browser automation capabilit
 
 ### Requirements
 - Node.js 18 or newer
-- VS Code, Cursor, Windsurf, Claude Desktop or any other MCP client
+- VS Code, Cursor, Windsurf, Claude Desktop, Goose or any other MCP client
 
 <!--
 // Generate using:
@@ -77,7 +77,7 @@ Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, u
 <details>
 <summary><b>Install in Windsurf</b></summary>
 
-Follow Windsuff MCP [documentation](https://docs.windsurf.com/windsurf/cascade/mcp). Use following configuration:
+Follow Windsurf MCP [documentation](https://docs.windsurf.com/windsurf/cascade/mcp). Use following configuration:
 
 ```js
 {
@@ -113,6 +113,28 @@ Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user),
 </details>
 
 <details>
+<summary><b>Install in Claude Code</b></summary>
+
+Use the Claude Code CLI to add the Playwright MCP server:
+
+```bash
+claude mcp add playwright npx @playwright/mcp@latest
+```
+</details>
+
+<details>
+<summary><b>Install in Goose</b></summary>
+
+#### Click the button to install:
+
+[![Install in Goose](https://block.github.io/goose/img/extension-install-dark.svg)](https://block.github.io/goose/extension?cmd=npx&arg=%40playwright%2Fmcp%40latest&id=playwright&name=Playwright&description=Interact%20with%20web%20pages%20through%20structured%20accessibility%20snapshots%20using%20Playwright)
+
+#### Or install manually:
+
+Go to `Advanced settings` -> `Extensions` -> `Add custom extension`. Name to your liking, use type `STDIO`, and set the `command` to `npx @playwright/mcp`. Click "Add Extension".
+</details>
+
+<details>
 <summary><b>Install in Qodo Gen</b></summary>
 
 Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in VSCode or IntelliJ → Connect more tools → + Add new MCP → Paste the following configuration:
@@ -131,6 +153,25 @@ Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in 
 ```
 
 Click <code>Save</code>.
+</details>
+
+<details>
+<summary><b>Install in Gemini CLI</b></summary>
+
+Follow the MCP install [guide](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#configure-the-mcp-server-in-settingsjson), use following configuration:
+
+```js
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+```
 </details>
 
 ### Configuration
@@ -326,9 +367,10 @@ npx @playwright/mcp@latest --config path/to/config.json
   };
  
   /**
-   * Do not send image responses to the client.
+   * Whether to send image responses to the client. Can be "allow", "omit", or "auto". 
+   * Defaults to "auto", images are omitted for Cursor clients and sent for all other clients.
    */
-  noImageResponses?: boolean;
+  imageResponses?: 'allow' | 'omit' | 'auto';
 }
 ```
 </details>
