@@ -75,7 +75,9 @@ export class Tab {
 
     const downloadEvent = callOnPageNoTrace(this.page, page => page.waitForEvent('download').catch(() => {}));
     try {
-      await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+      await this.page.goto(url, { waitUntil: 'networkidle' });
+      // add a sleep for 3 seconds to allow the page to load
+      await this.page.waitForTimeout(3000);
     } catch (_e: unknown) {
       const e = _e as Error;
       const mightBeDownload =
