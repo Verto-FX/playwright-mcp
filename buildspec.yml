@@ -1,0 +1,30 @@
+version: 0.2
+
+env:
+  parameter-store:
+    VERTO_PUBLISH_TOKEN: npm-publish-token
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20.x
+    commands:
+      - if [ -z "${VERTO_PUBLISH_TOKEN}" ]; then exit 1; fi
+      - node --version
+      - npm --version
+
+  pre_build:
+    commands:
+      - echo "Authenticating with npm..."
+      - echo "//registry.npmjs.org/:_authToken=${VERTO_PUBLISH_TOKEN}" > .npmrc
+
+  build:
+    commands:
+      - npm install
+      - npm run build
+      - npm publish
+
+  post_build:
+    commands:
+      - echo "In post_build phase"
+      - echo "Publishing to npm"

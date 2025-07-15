@@ -62,12 +62,17 @@ const click = defineTool({
 
     const code = [
       `// Click ${params.element}`,
-      `await page.${await generateLocator(locator)}.click();`
+      `await page.${await generateLocator(locator)}.click();`,
+      `// Wait 500ms after click`,
+      `await page.waitForTimeout(500);`
     ];
 
     return {
       code,
-      action: () => locator.click(),
+      action: async () => {
+        await locator.click();
+        await new Promise(resolve => setTimeout(resolve, 500));
+      },
       captureSnapshot: true,
       waitForNetwork: true,
     };
