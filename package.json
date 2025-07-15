@@ -1,6 +1,6 @@
 {
   "name": "@verto-fx/playwright-mcp",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "Playwright Tools for MCP - Verto-FX Fork",
   "type": "module",
   "repository": {
